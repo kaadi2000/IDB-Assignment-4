@@ -9,7 +9,7 @@ public class Row {
         this.columns = columns;
     }
 
-    Object getColumn(int index) {
+    public Object getColumn(int index) {
         return this.columns[index];
     }
 

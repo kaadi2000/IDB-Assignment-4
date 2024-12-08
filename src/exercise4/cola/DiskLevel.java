@@ -67,7 +67,28 @@ public class DiskLevel<K extends Comparable<K>, V> implements COLALevel<K, V> {
     public V search(K key) {
         // TODO:
         // Important: only load blocks for the actual lookup
+        int low = 0;
+        int high = numElems - 1;
 
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            long blockId = offset + ((mid / elemsPerBlock) * BasicCOLA.DISK_BLOCK_SIZE);
+            COLABlock<K,V> block = (COLABlock<K,V>) container.get(blockId);
+            Pair<K,V> midVal = block.get(mid % elemsPerBlock);
+
+            if (midVal == null || midVal.getFirst() == null) {
+                break;
+            }
+
+            int cmp = key.compareTo(midVal.getFirst());
+            if (cmp < 0) {
+                high = mid - 1;
+            } else if (cmp > 0) {
+                low = mid + 1;
+            } else {
+                return midVal.getSecond();
+            }
+        }
         return null;
     }
 
@@ -79,20 +100,32 @@ public class DiskLevel<K extends Comparable<K>, V> implements COLALevel<K, V> {
 
         // Fill blocks and save them
         while (elms.hasNext()) {
-            int mod = i++ % elemsPerBlock;
+            int mod = i % elemsPerBlock;
             if (mod == 0) {
                 if (block != null) {
                     container.update(id, block);
                     id += BasicCOLA.DISK_BLOCK_SIZE;
                 }
                 block = new COLABlock<>(elemsPerBlock);
-
             }
             block.set(mod, elms.next());
+            i++;
+        }
+
+        if (block == null) {
+            block = new COLABlock<>(elemsPerBlock);
+        }
+        int remainder = i % elemsPerBlock;
+        if (remainder != 0) {
+            for (int fill = remainder; fill < elemsPerBlock; fill++) {
+                block.set(fill, new Pair<>((K)(Long)0L, (V)(Double)0.0));
+            }
         }
 
         // Save last block
         container.update(id, block);
+
+
     }
 
     @Override

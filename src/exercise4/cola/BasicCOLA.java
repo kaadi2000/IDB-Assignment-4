@@ -91,13 +91,25 @@ public class BasicCOLA<K extends Comparable<K>, V> {
             public COLABlock<K, V> read(DataInput dataInput, COLABlock<K, V> block) throws IOException {
                 block = new COLABlock<>(elementsPerBlock);
                 // TODO: read from dataInput to construct a COLABlock
-
+                for (int i = 0; i < elementsPerBlock; i++) {
+                    K key = keyConverter.read(dataInput, null);
+                    V value = valueConverter.read(dataInput, null);
+                    block.set(i, new Pair<>(key, value));
+                }
                 return block;
             }
 
             @Override
             public void write(DataOutput dataOutput, COLABlock<K, V> object) throws IOException {
                 // TODO: write a COLABlock to dataOutput
+                for (int i = 0; i < elementsPerBlock; i++) {
+                    Pair<K, V> p = (i < object.getSize()) ? object.get(i) : null;
+                    if (p == null || p.getFirst() == null || p.getSecond() == null) {
+                        p = new Pair<>((K)(Long)0L,(V)(Double)0.0);
+                    }
+                    keyConverter.write(dataOutput, p.getFirst());
+                    valueConverter.write(dataOutput, p.getSecond());
+                }
 
             }
         });
@@ -196,7 +208,13 @@ public class BasicCOLA<K extends Comparable<K>, V> {
      */
     public V searchElement(K key) throws NoSuchElementException {
         // TODO: impl. top to bottom search
-
+        for (int level = 0; level < arrayOffsets.size() || level < levelsInCache; level++) {
+            COLALevel<K, V> lvl = getLevel(level);
+            V val = lvl.search(key);
+            if (val != null) {
+                return val;
+            }
+        }
         throw new NoSuchElementException("No Entry found for Key: " + key);
     }
 

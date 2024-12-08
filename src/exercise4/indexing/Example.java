@@ -67,7 +67,11 @@ public class Example {
         System.out.println("PointQuery, Tree: " + (t1 - t0) * 1.0 / 10_000_000 * 1000 + "us");
 
         // Replace index by a hash index, measure point query again
-        table.setSecondaryIndex(1, new HashIndex());
+        try {
+            table.setSecondaryIndex(1, new HashIndex());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         t0 = System.currentTimeMillis();
         for (int i = 0; i < 10_000_000; i++) {
             table.pointQueryAtColumn(1, "ABCDEFGHI");

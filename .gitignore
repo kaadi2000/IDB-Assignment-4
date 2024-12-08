@@ -30,6 +30,11 @@ tmp/
 *.iws
 *.iml
 *.ipr
+*.ctr
+*.flt
+*.mtd
+*.rbm
+*.ubm
 out/
 
 # NetBeans files

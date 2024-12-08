@@ -1,13 +1,12 @@
 package exercise4.indexing.utils;
 
 
+import exercise4.indexing.primary.PrimaryIndex;
+import exercise4.indexing.secondary.SecondaryIndex;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import exercise4.indexing.primary.PrimaryIndex;
-import exercise4.indexing.secondary.SecondaryIndex;
 
 public class Table {
     private final Schema schema;
@@ -98,7 +97,7 @@ public class Table {
                 });
             }
 
-            return new ResultSet(primaryIndex, tids);
+            return new ResultSet(primaryIndex, ids);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error performing point query at column");
